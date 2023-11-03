@@ -24,3 +24,30 @@ sudo systemctl start jenkins
 sudo systemctl status jenkins
 sudo su - ec2-user
 echo "echo of jenkins installation"
+
+~~~~~~~~~~~``~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#!/bin/bash
+
+sudo hostname docker
+sudo apt update -y 
+sudo apt install docker.io -y
+sudo usermod -aG docker ubuntu
+sudo systemctl restart docker
+sudo systemctl enable docker.service
+
+sudo apt install openjdk-11-jdk -y
+
+sudo wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+sudo sh -c 'echo deb https://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+sudo apt update && sudo apt install jenkins -y 
+sudo systemctl start jenkins
+
+sudo usermod -aG docker jenkins
+sudo systemctl restart docker.service
+sudo systemctl enable docker.service
+sudo echo "jenkins  ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/jenkins
+
+sudo echo "jenkins:admin" | chpasswd
+sudo sed -i "/^[^#]*PasswordAuthentication[[:space:]]no/c\PasswordAuthentication yes" /etc/ssh/sshd_config
+sudo service sshd restart
+sudo usermod -aG docker jenkins
